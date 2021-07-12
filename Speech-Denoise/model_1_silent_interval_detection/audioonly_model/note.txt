@@ -1,0 +1,21 @@
+# Tim output shape cua networks [1,60] Ok
+# Tim shape cua label trong dataloader  [1,60] Ok
+# Chia audio 2 label cua 2 audio thanh 2 phan 60 va 60 => hoi kho hieu => Ok
+# Shape cua sound sau khi load tu file vao van giu nguyen gia tri nhu cu => Ok
+# shape se duoc doi ve [2,1,256,178] sau bien doi fast_stft => Ok do mk chunk data trong 1 khoang
+$$Da hieu input cua model nhung chua hieu output
+Action:
+- Tim hieu ve ham create_sample_list_from_indices (Chua xong)
+- Tim hieu ve ly do tai sau sau stft lai tro ve [2,1,256,178] Ok
+Ly do la vi o ham __get_item__ ngta da thuc hien chunk audio den 28000 sample 
+to fix the length during training
+=> Can tao label theo 28000 sample 
+- Comment lai dong # f_s = F.interpolate(f_s, size=v_num_frames) # (B, C2, T1)
+trong file network.py de dau ra bang vs dau vao
+- Tim hieu function create_sample_list_from_indices trong file tools.py
+
+
+
+- Fix lai label phuc vu viec training
+- Thu lai transform tu stft sang wave form
+- Them sigmoid function o output cua network
