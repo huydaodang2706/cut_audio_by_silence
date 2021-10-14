@@ -170,7 +170,7 @@ def main(args):
         sys.exit(1)
     audio, sample_rate = read_wave(args[1])
     vad = webrtcvad.Vad(int(args[0]))
-    frames = frame_generator(30, audio, sample_rate)
+    frames = frame_generator(10, audio, sample_rate)
     frames = list(frames)
     # segments = vad_collector(sample_rate, 30, 300, vad, frames)
     # for i, segment in enumerate(segments):
@@ -181,7 +181,7 @@ def main(args):
     f.writelines('file_name,start,end\n')
     audio_read = AudioSegment.from_wav( args[1] )
     
-    speech_timestamps = vad_collector(sample_rate, 30, 300, vad, frames)
+    speech_timestamps = vad_collector(sample_rate, 10, 100, vad, frames)
     for i,segment in enumerate(speech_timestamps):
         print(segment)
         audio_segment = audio_read[segment['start']:segment['end']]

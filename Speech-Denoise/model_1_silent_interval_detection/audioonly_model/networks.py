@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import timeit
 
 # Functions
 ##############################################################################
@@ -127,7 +127,7 @@ class AudioVisualNet(nn.Module):
         encoder_x.append(Conv2dBlock(nf, outf, (1, 1), (1, 1)))
         return nn.Sequential(*encoder_x)
 
-    def forward(self, s, v_num_frames=60):
+    def forward(self, s):
         f_s = self.encoder_audio(s)
         # print("f_s.shape:",f_s.shape)
         # Reshape tensor
@@ -151,7 +151,7 @@ class AudioVisualNet(nn.Module):
         #     self.lstm.flatten_parameters()
         # print("Conv.shape:",merge.shape)
 
-        self.lstm.flatten_parameters()
+        # self.lstm.flatten_parameters()
         merge, _ = self.lstm(merge)
         # print("lstm.shape:",merge.shape)
 
@@ -167,17 +167,20 @@ class AudioVisualNet(nn.Module):
 
 
 def test():
-    net = AudioVisualNet()
+    net = AudioVisualNet().to(torch.device('cpu'))
     # print(net)
     # v = torch.randn((8, 3, 60, 224, 224))
 
     # input of this network is the ouput of Fourier Transform (178 is the time frames)
     # 2 is the channel of Fourier transform (1 is real part, 2 is virtual part)
     # 8 here is the number of audio spectrogram
-    s = torch.randn((8, 2, 256, 178))
+    s = torch.randn((1, 2, 256, 600))
     # print(s)
     # out = net(v, s)
+    start = timeit.default_timer()
     out = net(s)
+    stop = timeit.default_timer()
+    print('Time: ', (stop - start))
     print(out.shape)
     # print(out)
 

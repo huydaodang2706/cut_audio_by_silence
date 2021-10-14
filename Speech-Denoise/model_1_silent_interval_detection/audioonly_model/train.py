@@ -48,11 +48,19 @@ def main():
 
     writer = SummaryWriter()
     # create dataloader
-    train_loader = get_dataloader(PHASE_TRAINING, batch_size=config.batch_size, num_workers=2, dataset_json="/home3/huydd/huydd/data_with_noise/train_data/result_json/train.json")
-    val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, dataset_json="/home3/huydd/huydd/data_with_noise/val_data/result_json/val.json")
-    val_loader_step = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, dataset_json="/home3/huydd/huydd/data_with_noise/val_data/result_json/val.json")
+    # train_data = '/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
+    # val_data = '/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/val_youtube_huy_gan.csv'
+    train_data = '/home3/huydd/cut_by_mean/EOU_data/silence_detection_csv/train_lan_2/train/train_thu_am_qa_vivos_infore_noise_silence.csv'
+    val_data = '/home3/huydd/cut_by_mean/EOU_data/silence_detection_csv/train_lan_2/dev/dev_vivos_old_fake_data.csv'
+    
+    train_loader = get_dataloader(PHASE_TRAINING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=train_data)
+    val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
+    val_loader_step = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
     val_loader_step = cycle(val_loader_step)
     # val_loader = cycle(val_loader)
+    # val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/val_silence_6.csv')
+    # val_loader_step = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/val_silence_6.csv')
+    # val_loader_step = cycle(val_loader_step)
 
     # start training
     clock = tr_agent.clock
@@ -60,16 +68,14 @@ def main():
     for e in range(clock.epoch, config.nr_epochs):
         n = 0
         # begin iteration
+        train_losses_sum = 0
         pbar = tqdm(train_loader)
         for b, data in enumerate(pbar):
             # train step
             n += 1
             outputs, train_losses = tr_agent.train_func(data)
             
-            if n==1:
-                train_losses_sum = train_losses['bce']
-            else:
-                train_losses_sum += train_losses['bce']
+            train_losses_sum += train_losses['bce'].item()
             
             # visualize
             # if args.vis and clock.step % config.visualize_frequency == 0:
@@ -91,11 +97,19 @@ def main():
                 #     tr_agent.visualize_batch(data, "validation", outputs)
 
             clock.tick()
-        train_losses_sum =  train_losses_sum / (n*config.batch_size)
+        train_losses_sum =  train_losses_sum / n
         print("\nResult Epoch {} Train Loss {} ".format(e, train_losses_sum))
         writer.add_scalar('Loss/train',train_losses_sum, e)
+    
+        # Calculate val loss
+        # val_loss = tr_agent.eval(val_loader)
+    
         # save the best accuracy
-        epoch_acc = tr_agent.evaluate(val_loader)
+        epoch_acc, val_loss = tr_agent.evaluate(val_loader)
+
+        print("\nVal loss epoch {}:{}".format(e,val_loss))
+        writer.add_scalar('Val loss:',val_loss, e)
+
         print("Epoch {} - accuracy {}".format(e, epoch_acc))
         writer.add_scalar('Val accuracy',epoch_acc, e)
 

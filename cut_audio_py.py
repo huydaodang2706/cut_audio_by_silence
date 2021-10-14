@@ -120,12 +120,15 @@ for sub2 in os.listdir(args.audio_dir):
                 g.close()   
                 if os.path.isfile(os.path.join(output_dir,'predict_label.txt')):
                     os.system('rm -rf ' + audio_path )
-                
             except:
                 cpu_cannot_do.append(audio_path)
                 print(output_dir + ' cannot be processed by this cpu!')
                 os.system('rm -rf ' + output_dir)
                 os.system('rm -rf ' + save_dir)
+            for temp_path in os.listdir(save_dir):
+                if temp_path.endswith('wav'):
+                    os.remove(os.path.join(save_dir, temp_path))
+
 print('CPU cannot do:')
 for path in cpu_cannot_do:
     print(path)

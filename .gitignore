@@ -1,0 +1,8 @@
+runs/
+model_output/
+Speech-Denoise/result/
+py-webrtcvad/cut_audio_py/
+gen_text_grid.py
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/calculate_precision_recall.py
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/infer_voi_1file.py
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/val_infer.py

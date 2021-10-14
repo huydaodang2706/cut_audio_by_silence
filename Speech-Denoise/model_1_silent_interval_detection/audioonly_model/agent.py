@@ -172,7 +172,7 @@ class MyAgent(BaseAgent):
         # if torch.cuda.device_count() > 1:
         #     print('Multi-GPUs available')
         #     net = nn.DataParallel(net.cuda())   # For multi-GPU
-        if torch.cuda.device_count() == 1:
+        if torch.cuda.device_count() >= 1:
             print('Single-GPU available')
             net = net.cuda()    # For single-GPU
         else:
@@ -221,18 +221,17 @@ class MyAgent(BaseAgent):
         return output, {"bce": loss}
 
     def evaluate(self, dataloader):
-        metrics = AverageMeter("loss")
+        # metrics = AverageMeter("loss")
         epoch_acc = AverageMeter("acc")
+        val_losses = AverageMeter("val_loss")
+
         pbar = tqdm(dataloader)
         self.net.eval()
         with torch.no_grad():
             for data in pbar:
                 pbar.set_description("EVALUATION")
                 outputs, losses = self.forward(data)
-                # print('outputs:', outputs)
-                # print('losses:', losses)
-                metrics.update(losses["bce"].item())
-
+                
                 pred_labels = (torch.sigmoid(outputs).detach().cpu().numpy() >= 0.5).astype(np.float)
                 # print('pred_labels:', pred_labels)
                 labels = data['label'].numpy()
@@ -240,12 +239,30 @@ class MyAgent(BaseAgent):
                 acc = np.mean(pred_labels == labels)
                 # print('acc:', acc)
                 epoch_acc.update(acc)
+                val_losses.update(losses['bce'].item())
+
 
         # self.val_tb.add_scalar("epoch_loss", metrics.avg, global_step=self.clock.epoch)
         # self.val_tb.add_scalar("epoch_acc", epoch_acc.avg, global_step=self.clock.epoch)
 
-        return epoch_acc.avg
+        return epoch_acc.avg, val_losses.avg
 
+    def eval(self, dataloader):
+        pbar = tqdm(dataloader)
+        val_losses = []
+        self.net.eval()
+        with torch.no_grad():
+            for data in pbar:
+                pbar.set_description("Val loss")
+                outputs, losses = self.forward(data)
+                losses = losses['bce']
+                val_losses.append(losses.item())
+        
+        avg_loss = 0
+        for x in val_losses:
+            avg_loss += x
+            
+        return avg_loss/(len(val_losses))
     # def visualize_batch(self, data, mode, outputs=None, n=1):
     #     tb = self.train_tb if mode == 'train' else self.val_tb
     #     for i in range(n):

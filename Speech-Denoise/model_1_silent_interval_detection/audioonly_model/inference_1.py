@@ -116,7 +116,8 @@ def main():
     else:
         name = "ckpt_epoch{}".format(args.ckpt)
 
-    load_path = os.path.join('/home/vbee/huydd/cut_data/model_output/huydd/','model',"{}.pth".format(name))
+    # load_path = os.path.join('/home3/huydd/cut_audio_by_silence/model_output/huydd/','model',"{}.pth".format(name))
+    load_path = os.path.join('/home3/huydd/huydd/model_output/huydd/','model',"{}.pth".format(name))
 
     print('Load saved model: {}'.format(load_path))
     if args.gpu:
@@ -179,7 +180,7 @@ def main():
             print("Frames length {}".format(len(frames)))
             print("Save Frames length {}".format(len(save_frames)))
 
-            speech_timestamps = vad_collector(6/601,30,frames,sr )
+            speech_timestamps = vad_collector(6/601,20,frames,sr )
             print(speech_timestamps)
             # split_audio(sound, sr,speech_timestamps,args.save_dir,file)
             
