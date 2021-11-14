@@ -3,9 +3,10 @@ from pydub import AudioSegment
 import argparse
 import os
 
-
+# MIN va MAX SILEMCE LENGTH nen la min = 0.01s tro xuong, max = 0.3s tro xuong
 MIN_SILENCE_INTERVAL = 0.01
 MAX_SILENCE_INTERVAL = 0.02
+# MIN va MAX AUDIO LENGTH nen chenh nhau 5-10s
 MIN_AUDIO_LEN = 10
 MAX_AUDIO_LEN = 15
 MAX_ACCEPT_SILENCE_INTERVAL = 2
@@ -23,6 +24,18 @@ def process_csv(audio_path, pr_path, save_path, base_name,
         min_audio_len=MIN_AUDIO_LEN,
         max_audio_len=MAX_AUDIO_LEN,
         max_accept_silence=MAX_ACCEPT_SILENCE_INTERVAL):
+    '''
+        Input:
+            audio_path: path of audio
+            pr_path: path of csv prediction (output vad, time is second)
+        Output: 
+            None
+    '''
+    if max_accept_silence/2 > 1:
+        padding = 1
+    else:
+        padding = int(max_accept_silence/2)
+    
     ori_audio = AudioSegment.from_wav(audio_path)
     pr_result = pd.read_csv(pr_path)
     
@@ -38,21 +51,22 @@ def process_csv(audio_path, pr_path, save_path, base_name,
     flag_max = False
     # Flag skip 
     flag_skip = False
-    flag_skip_1 = False
     # Index start of the block for scanning interval to cut
     index_start = 0
     next_blog = False
     file_index = 0
-    # for index, row in pr_result.iterrows():
-    # for index in range(number_of_rows):
+
     while index_start < number_of_rows:
         index = index_start
         next_blog = False
+        print('-----------------------------------------')
         print('Start of the block to scan: ' , index)
-        # print(row)
-        # Process block of index 0 - number of row - 2, row number of row - 1 will be processed in the end 
+        
         file_index += 1
         file_save_path = os.path.join(save_path, base_name + '_' + str(file_index) + '.wav')
+        # Khi bat dau 1 block thi se dat lai 1 so tham so
+        silence_len = max_silence
+        
         while index < number_of_rows and not next_blog:
             row = pr_result.iloc[index]
         
@@ -63,7 +77,7 @@ def process_csv(audio_path, pr_path, save_path, base_name,
                 elif flag_skip:
                     print('Skip previous cut point')
                 elif flag_max:
-                    pre_cut_p = row['start'] - 1
+                    pre_cut_p = row['start'] - padding
                 else:
                     pre_cut_p = cur_cut_p
                     
@@ -71,7 +85,7 @@ def process_csv(audio_path, pr_path, save_path, base_name,
                 # B2: Xu ly silence interval
                 silence_duration = pr_result.iloc[index + 1]['start'] - row['end']
 
-                if silence_duration < max_silence:
+                if silence_duration < silence_len:
                     flag_skip = True
                     # skip_silence_intervals.append(row)
                 else:
@@ -80,11 +94,13 @@ def process_csv(audio_path, pr_path, save_path, base_name,
                     # silence duration > MAX_SILENCE_INTERVAL
                     if silence_duration > max_accept_silence:
                         flag_max = True
-                        cur_cut_p = row['end'] + 1
-                        index_start = index + 1
-                        next_blog = True
+                        cur_cut_p = row['end'] + padding
+                        
                         print('Cut audio')
                         export_audio(ori_audio, pre_cut_p, cur_cut_p, file_save_path)
+                        
+                        index_start = index + 1
+                        next_blog = True
                     else:
                         flag_max = False
 
@@ -100,58 +116,43 @@ def process_csv(audio_path, pr_path, save_path, base_name,
                                 index_start = index + 1
                                 next_blog = True
                             else:
-                                # Truong hop audio_len > max_audio_len
-                                # Tinh toan voi min_silence_interval
-                                flag_skip_1 = False
-                                index_1 = index_start
-                                # for index_1 in range(index_start,index):
-                                while index_1 <= index and not next_blog:
-                                # for index_1, interval in enumerate(skip_silence_intervals):
-                                    if index_1 < index :
-                                        
-                                        silence_du = pr_result.iloc[index_1+1]['start'] - pr_result.iloc[index_1]['end']
-                                        if silence_du < min_silence:
-                                            flag_skip_1 = True
-                                        else:
-                                            cur_cut_p = pr_result.iloc[index_1]['end'] + int(silence_du/2)
-                                            audio_len = cur_cut_p - pre_cut_p
-                                            if audio_len < min_audio_len:
-                                                flag_skip_1 = True
-                                            else:
-                                                if audio_len > max_audio_len:
-                                                    print('Audio len > Max audio len - cannot cut with this max audio len')
-                                                    print('Cut audio')
-                                                    export_audio(ori_audio, pre_cut_p, cur_cut_p, file_save_path)
-
-                                                    flag_skip_1 = False
-                                                    index_start = index_1 + 1
-                                                    next_blog = True
-                                                else:
-                                                    print('Cut audio')
-                                                    export_audio(ori_audio, pre_cut_p, cur_cut_p, file_save_path)
-
-                                                    flag_skip_1 = False
-                                                    index_start = index_1 + 1
-                                                    next_blog = True
-
+                                # Truong hop audio len vuot qua max_audio_len thi phai duyet lai tu index_start de va su dung min_silence_len
+                                if silence_len == max_silence:
+                                    silence_len = min_silence
+                                    index = index_start - 1
+                                    flag_skip = True
+                                    print('Need search again from: ', index_start)
+                                elif silence_len == min_silence:
+                                    silence_len = 0.04
+                                    # Quay tro lai index_start de scan nhung tru 1 de cong 1 ben duoi la vua
+                                    index = index_start - 1
+                                    flag_skip = True
+                                    print('Need search again from: ', index_start)
+                                else:
+                                    if index_start != index:
+                                        silence_duration = pr_result.iloc[index]['start'] - pr_result.iloc[index - 1]['end']
+                                        cur_cut_p = pr_result.iloc[index - 1]['end'] + int(silence_duration/2)
+                                        index_start = index
                                     else:
-                                        if flag_skip_1:
-                                            cur_cut_p = pr_result.iloc[index_1]['end']
-                                            index_start = index_1 + 1
-                                            next_blog = True
-                                            print('Cut audio')
-                                            export_audio(ori_audio, pre_cut_p, cur_cut_p, file_save_path)
-
-                                    index_1 += 1                                
+                                        index_start = index + 1
+                                    
+                                    export_audio(ori_audio,pre_cut_p, cur_cut_p, file_save_path)
+                                    flag_skip = False
+                                    next_blog = True
+                                    
                         else:
                             flag_skip = True
                 
             else:
+                # index chay den cuoi file roi thi khong can phai xu ly gi nua ma cat luon
+                pre_cut_p = cur_cut_p
                 cur_cut_p  = row['end'] 
-                index_start = index + 1
-                next_blog = True
+                # index += 1
                 print('Cut audio')
                 export_audio(ori_audio, pre_cut_p, cur_cut_p, file_save_path)
+                
+                index_start = index + 1
+                next_blog = True
 
             index += 1
 

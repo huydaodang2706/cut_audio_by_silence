@@ -9,26 +9,17 @@ from itertools import groupby
 from tqdm import tqdm
 
 # python3 -m pip install --user imageio
-import imageio
 import librosa
 import numpy as np
-from pathlib import Path
-import pylab
 import torch
 from torch.utils.data import DataLoader, Dataset
-from torch.utils.data.sampler import WeightedRandomSampler
-from joblib import Parallel, delayed
 
-from common import EXPERIMENT_NAME, PROJECT_ROOT, PHASE_TESTING, PHASE_TRAINING, PHASE_PREDICTION
+from common import EXPERIMENT_NAME, PROJECT_ROOT, PHASE_TESTING, PHASE_TRAINING
 from tools import *
-from utils import ensure_dir, get_parent_dir, get_basename_no_ext
-from visualization import draw_waveform, draw_spectrum
-import cv2
 import pandas as pd
 
 
 DATA_ROOT = os.path.join(PROJECT_ROOT, "../", "dataset")
-DEBUG_OUT = os.path.join(DATA_ROOT, "debug_dataset_output", EXPERIMENT_NAME)
 NUM_DATA = 6000    # 100000
 SILENT_CONSECUTIVE_FRAMES = 1
 CLIP_FRAMES = 60
@@ -53,15 +44,15 @@ AUDIOSET_NOISE_SRC_EVAL = os.path.join(DATA_ROOT, "audioset_noises_balanced_eval
 
 # Functions
 ##############################################################################
-def get_dataloader(phase, max_audio_length=None, batch_size=4, num_workers=4, csv_file=None):
+def get_dataloader(phase, sample_rate=DATA_REQUIRED_SR, max_audio_length=None, batch_size=4, num_workers=4, csv_file=None, n_fft=510, hop_length=160, win_length=400):
     print('Mode:', phase)
 
     num_data = NUM_DATA if phase == PHASE_TRAINING else NUM_DATA // 10
     is_shuffle = phase == PHASE_TRAINING
 
     # dataset
-    dataset = AudioVisualAVSpeechMultipleVideoDataset(phase, num_data, CLIP_FRAMES, SILENT_CONSECUTIVE_FRAMES,\
-        max_audio_length=max_audio_length, csv_file=csv_file)
+    dataset = AudioVisualAVSpeechMultipleVideoDataset(phase, sample_rate=sample_rate, \
+        max_audio_length=max_audio_length, csv_file=csv_file, n_fft=n_fft, hop_length=hop_length, win_length=win_length)
 
     # dataloader
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=is_shuffle,\
@@ -73,16 +64,13 @@ def get_dataloader(phase, max_audio_length=None, batch_size=4, num_workers=4, cs
 # datasets
 ##############################################################################
 class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
-    def __init__(self, phase, num_samples, clip_frames, consecutive_frames, max_audio_length, csv_file=None, n_fft=510, hop_length=160, win_length=400, X_col='audio_path', y_col='label'):
+    def __init__(self, phase, max_audio_length, sample_rate=DATA_REQUIRED_SR, csv_file=None, n_fft=510, hop_length=160, win_length=400, X_col='audio_path', y_col='label'):
         print('========== DATASET CONSTRUCTION ==========')
         print('Initializing dataset...')
         super(AudioVisualAVSpeechMultipleVideoDataset, self).__init__()
         self.phase = phase
-
-        self.clip_frames = clip_frames
-        self.consecutive_frames = consecutive_frames
-        self.num_samples = num_samples
-
+        
+        self.sample_rate = sample_rate
         self.n_fft = n_fft
         self.hop_length = hop_length
         self.win_length = win_length
@@ -98,11 +86,6 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
         print('Generating data items...')
         print('========== SUMMARY ==========')
         print('Mode:', phase)
-        print('Num samples:', self.num_samples)
-        print('Data frames:', self.clip_frames)
-        print('Consecutive frames:', self.consecutive_frames)
-        print('Max noise length in seconds:', NOISE_MAX_LENGTH_IN_SECOND)
-        print('Max audio samples per data:', DATA_MAX_AUDIO_SAMPLES)
         print('n_fft: {}'.format(self.n_fft))
         print('hop_length: {}'.format(self.hop_length))
         print('win_length: {}'.format(self.win_length))
@@ -111,8 +94,9 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
         return len(self.df)
 
     def __get_input(self, path, max_audio_length):
-        snd, sr = librosa.load(path, sr=DATA_REQUIRED_SR)
+        snd, sr = librosa.load(path, sr=self.sample_rate)
         if max_audio_length is not None:
+            # Pad with zero if max_audio_length > len(snd)
             snd = librosa.util.fix_length(snd, max_audio_length*sr)
         snd = audio_normalize(snd)
 
@@ -125,25 +109,7 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
     def __get_output(self, label_string, audio_length=None):
         raw_label = json.loads(label_string)
         raw_label = [0 if x==2 else x for x in raw_label]
-        # print("This is raw label:",raw_label)
-        # if num_classes == 3:
-        #     for i, x in enumerate(raw_label):
-        #         if x == 0:
-        #         # intermidiate silence
-        #             class_label = numpy.array([[1, 0, 0]])
-        #         elif x == 1:
-        #         # speech 
-        #             class_label = numpy.array([[0, 1, 0]])
-        #         elif x == 2:
-        #         # final silence 
-        #             class_label = numpy.array([[0, 0, 1]])
-            
-        #     label = None
-        #     if i == 0:
-        #         label = class_label
-        #     else:
-        #         label = numpy.append(label, class_label, axis=0)
-
+    
         # else: 
         # binary classification
         # label = json.loads(f['label'])
@@ -160,24 +126,11 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
                 for i in range(len(raw_label)- audio_length):
                     raw_label.pop()
 
-        # if audio_length < 600:
-        #     print("Length of label:  th1 ", len(raw_label))
-        # if len(raw_label) < 600:
-        #     print("Length of label:  th2 ", len(raw_label))
-        # print("Length of label ::::",len(raw_label))
-        # label = numpy.array(raw_label)
-        # label = numpy.expand_dims(label, axis=0)
         label = torch.tensor(raw_label, dtype=torch.float32)
         return label
 
 
     def __getitem__(self, index):
-        # Item is the object to iterate
-        # item[0]: video clip index
-        # item[1]: data first bit's index in video clip
-        # item[2]: data bit stream
-        # item[3]: audio_path
-        # item[4]: framerate
         item = self.df.iloc[index]
         audio_path = item[self.X_col]
         label_string = item[self.y_col]
@@ -198,8 +151,9 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
 def test():
     print('In test')
     data_csv_path='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
+    data_csv_path='/home3/huydd/cut_by_mean/EOU_data/EOU_csv/data_de_train/infore.csv'
     # dataloader = get_dataloader(PHASE_TRAINING, batch_size=1, num_workers=20, dataset_json=data_json_path)
-    dataloader = get_dataloader(PHASE_TESTING, batch_size=10, num_workers=1,csv_file=data_csv_path)
+    dataloader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=1, num_workers=1,csv_file=data_csv_path, hop_length=80)
     # dataloader = get_dataloader(PHASE_PREDICTION, batch_size=8, num_workers=0)
     for i, data in enumerate(dataloader):
         print('================================================================')

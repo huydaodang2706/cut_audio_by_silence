@@ -45,7 +45,7 @@ def predict_chunk(model, chunk, gpu):
     frames = list(map(int, frames))
     
     frames = frames[0:num_frame]
-    print('Output shape: ', len(frames) )
+    # print('Output shape: ', len(frames) )
     return frames
  
     # print("Silence frames:",frames)
