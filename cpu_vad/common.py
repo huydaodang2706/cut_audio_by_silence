@@ -56,7 +56,7 @@ class Config(object):
         self.set_network_info()
 
         # training configuration
-        self.nr_epochs = 60
+        self.nr_epochs = 2
         self.batch_size = 1    # GPU memory usage
         self.num_workers = 4 #32 #multiprocessing.cpu_count()    # RAM usage
         self.lr = 1e-3 #1e-4

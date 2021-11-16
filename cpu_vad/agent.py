@@ -12,7 +12,6 @@ from tqdm import tqdm
 
 from networks import get_network
 from utils import AverageMeter, TrainClock
-from tools import weighted_binary_cross_entropy
 
 # from common import PRETRAINED_MODEL_PATH
 # from networks import set_requires_grad

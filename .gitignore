@@ -1,3 +1,8 @@
+cpu_vad/model_output_cpu_vad/
+cpu_vad/runs/
+cpu_vad/test_dataset/
+cpu_vad/train_log/
+cpu_vad/__pycache__/
 runs/
 model_output/
 Speech-Denoise/result/

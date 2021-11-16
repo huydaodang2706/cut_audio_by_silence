@@ -48,10 +48,10 @@ def main():
 
     writer = SummaryWriter()
     # create dataloader
-    # train_data = '/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
-    # val_data = '/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/val_youtube_huy_gan.csv'
-    train_data = '/home3/huydd/cut_by_mean/EOU_data/silence_detection_csv/train_lan_2/train/train_thu_am_qa_vivos_infore_noise_silence.csv'
-    val_data = '/home3/huydd/cut_by_mean/EOU_data/silence_detection_csv/train_lan_2/dev/dev_vivos_old_fake_data.csv'
+    train_data = '/home3/huydd/cut_audio_by_silence/cpu_vad/test_dataset/train.csv'
+    val_data = '/home3/huydd/cut_audio_by_silence/cpu_vad/test_dataset/val.csv'
+    # train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/train.csv'
+    # val_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val.csv'
     
     train_loader = get_dataloader(PHASE_TRAINING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=train_data)
     val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
