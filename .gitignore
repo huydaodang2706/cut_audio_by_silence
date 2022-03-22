@@ -11,3 +11,6 @@ gen_text_grid.py
 Speech-Denoise/model_1_silent_interval_detection/audioonly_model/calculate_precision_recall.py
 Speech-Denoise/model_1_silent_interval_detection/audioonly_model/infer_voi_1file.py
 Speech-Denoise/model_1_silent_interval_detection/audioonly_model/val_infer.py
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/model_ckpt
+Speech-Denoise/model_1_silent_interval_detection/vad_aicc
+cpu_vad/best_acc.pth

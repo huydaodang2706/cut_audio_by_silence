@@ -110,23 +110,23 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
         raw_label = json.loads(label_string)
         raw_label = [0 if x==2 else x for x in raw_label]
     
-        # else: 
-        # binary classification
-        # label = json.loads(f['label'])
-        # if audio_length is not None:
-        #     for i in range(audio_length - len(raw_label)):
-        #         raw_label.append(0)
-        #         # Append silence at the end
+        # Xu ly audio cho 8khz -> gop 2 index thanh 1 -> chia doi de lay gia tri
+        label = []
+        for i in range(len(raw_label)):
+            if (i%2 == 1):
+                # label.append((raw_label[i] + raw_label[i-1])/2)
+                label.append(raw_label[i])
+
         if audio_length is not None:
-            if audio_length > len(raw_label):
-                for i in range(audio_length - len(raw_label)):
-                    raw_label.append(0)
+            if audio_length > len(label):
+                for i in range(audio_length - len(label)):
+                    label.append(0)
             # Append silence at the end
             else:
-                for i in range(len(raw_label)- audio_length):
+                for i in range(len(label)- audio_length):
                     raw_label.pop()
-
-        label = torch.tensor(raw_label, dtype=torch.float32)
+        # Khong dung thi xoa doan ben tren di
+        label = torch.tensor(label, dtype=torch.float32)
         return label
 
 
@@ -151,15 +151,17 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
 def test():
     print('In test')
     data_csv_path='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
-    data_csv_path='/home3/huydd/cut_by_mean/EOU_data/EOU_csv/data_de_train/infore.csv'
+    data_csv_path='/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/train_8khz_aicc.csv'
     # dataloader = get_dataloader(PHASE_TRAINING, batch_size=1, num_workers=20, dataset_json=data_json_path)
-    dataloader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=1, num_workers=1,csv_file=data_csv_path, hop_length=80)
+    dataloader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=1, num_workers=1,csv_file=data_csv_path, hop_length=160, n_fft=254, win_length=200)
     # dataloader = get_dataloader(PHASE_PREDICTION, batch_size=8, num_workers=0)
     for i, data in enumerate(dataloader):
         print('================================================================')
         print('batch index:', i)
         # print('data[\'frames\'].size():', data['frames'].size())
         # print('data[\'bitstream\']',data['audio'])
+        print('data[\'label\'].size():', data['label'])
+
         print('data[\'label\'].size():', data['label'].size())
         # print('data[\'label\']:', data['label'])
         print('data[\'audio\'].size():', data['audio'].size())

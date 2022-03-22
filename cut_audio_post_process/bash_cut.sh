@@ -1,0 +1,1 @@
+python post_process.py --audio_dir=/home3/cuongld/ASR_team/data_ASR/vietnamese_dataset/crawl/script_sp/youtube/data_bo_sung_asr/okkie/ --predict_dir=/home3/cuongld/ASR_team/data_ASR/vietnamese_dataset/crawl/script_sp/youtube/data_bo_sung_asr/okkie_re/ --save_dir=/home3/cuongld/ASR_team/data_ASR/vietnamese_dataset/crawl/script_sp/youtube/data_bo_sung_asr/okkie_da_cut/ 

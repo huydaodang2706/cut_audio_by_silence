@@ -118,8 +118,8 @@ for sub2 in os.listdir(args.audio_dir):
                 print(len(predict_label))
                 g.writelines(str(predict_label))
                 g.close()   
-                if os.path.isfile(os.path.join(output_dir,'predict_label.txt')):
-                    os.system('rm -rf ' + audio_path )
+                # if os.path.isfile(os.path.join(output_dir,'predict_label.txt')):
+                #     os.system('rm -rf ' + audio_path )
             except:
                 cpu_cannot_do.append(audio_path)
                 print(output_dir + ' cannot be processed by this cpu!')

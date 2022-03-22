@@ -50,12 +50,12 @@ def main():
     # create dataloader
     # train_data = '/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
     # val_data = '/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/val_youtube_huy_gan.csv'
-    train_data = '/home3/huydd/cut_by_mean/EOU_data/silence_detection_csv/train_lan_2/train/train_thu_am_qa_vivos_infore_noise_silence.csv'
-    val_data = '/home3/huydd/cut_by_mean/EOU_data/silence_detection_csv/train_lan_2/dev/dev_vivos_old_fake_data.csv'
+    train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/train_first_data.csv'
+    val_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val_first_data.csv'
     
-    train_loader = get_dataloader(PHASE_TRAINING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=train_data)
-    val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
-    val_loader_step = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
+    train_loader = get_dataloader(PHASE_TRAINING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=train_data,n_fft=254, win_length=200, sample_rate=8000)
+    val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data, n_fft=254, win_length=200, sample_rate=8000)
+    val_loader_step = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data, n_fft=254, win_length=200, sample_rate=8000)
     val_loader_step = cycle(val_loader_step)
     # val_loader = cycle(val_loader)
     # val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/val_silence_6.csv')

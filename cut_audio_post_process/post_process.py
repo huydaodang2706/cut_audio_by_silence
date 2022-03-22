@@ -2,13 +2,14 @@ import pandas as pd
 from pydub import AudioSegment
 import argparse
 import os
+import shutil
 
 # MIN va MAX SILEMCE LENGTH nen la min = 0.01s tro xuong, max = 0.3s tro xuong
 MIN_SILENCE_INTERVAL = 0.01
 MAX_SILENCE_INTERVAL = 0.02
 # MIN va MAX AUDIO LENGTH nen chenh nhau 5-10s
-MIN_AUDIO_LEN = 10
-MAX_AUDIO_LEN = 15
+MIN_AUDIO_LEN = 10 
+MAX_AUDIO_LEN = 15 
 MAX_ACCEPT_SILENCE_INTERVAL = 2
 def export_audio(original_audio, start, end, save_path):
     # Start va end (giay)
@@ -174,16 +175,21 @@ if __name__ == '__main__':
 
     for pr_dir in os.listdir(args.predict_dir):
         # 
-        i = 0
-        audio_id = pr_dir.replace('_re','')
-        pr_file_path = os.path.join(args.predict_dir, pr_dir, audio_id + '.csv')
-        audio_path = os.path.join(args.audio_dir, audio_id, audio_id + '.wav')
+        if pr_dir.endswith('_re'):
+            i = 0
+            try:
+                audio_id = pr_dir.replace('_re','')
+                pr_file_path = os.path.join(args.predict_dir, pr_dir, audio_id + '.csv')
+                audio_path = os.path.join(args.audio_dir, audio_id, audio_id + '.wav')
 
-        # ori_audio = AudioSegment.from_wav(audio_path)
-        
-        save_path = os.path.join(args.save_dir, audio_id)
-        os.mkdir(save_path)
+                # ori_audio = AudioSegment.from_wav(audio_path)
+                
+                save_path = os.path.join(args.save_dir, audio_id)
+                os.mkdir(save_path)
 
-        process_csv(audio_path, pr_file_path, save_path, audio_id)    
-        # pr_result = pd.read_csv(pr_file_path)
-
+                process_csv(audio_path, pr_file_path, save_path, audio_id)    
+                pr_result = pd.read_csv(pr_file_path)
+            except: 
+                if os.path.isdir(save_path):
+                    shutil.rmtree(save_path, ignore_errors=True)
+                print('File not exists')

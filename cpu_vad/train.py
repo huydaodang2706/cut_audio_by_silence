@@ -48,8 +48,8 @@ def main():
 
     writer = SummaryWriter()
     # create dataloader
-    train_data = '/home3/huydd/cut_audio_by_silence/cpu_vad/test_dataset/train.csv'
-    val_data = '/home3/huydd/cut_audio_by_silence/cpu_vad/test_dataset/val.csv'
+    train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/train.csv'
+    val_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val.csv'
     # train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/train.csv'
     # val_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val.csv'
     

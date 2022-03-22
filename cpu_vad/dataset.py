@@ -38,7 +38,7 @@ AUDIOSET_NOISE_SRC_EVAL = os.path.join(DATA_ROOT, "audioset_noises_balanced_eval
 
 # Functions
 ##############################################################################
-def get_dataloader(phase, sample_rate=DATA_REQUIRED_SR, max_audio_length=None, batch_size=4, num_workers=4, csv_file=None, n_fft=510, hop_length=160, win_length=400):
+def get_dataloader(phase, sample_rate=DATA_REQUIRED_SR, max_audio_length=None, batch_size=4, num_workers=1, csv_file=None, n_fft=510, hop_length=160, win_length=400):
     print('Mode:', phase)
 
     num_data = NUM_DATA if phase == PHASE_TRAINING else NUM_DATA // 10
@@ -96,11 +96,14 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
 
         audio = snd
         # mixed_sig_stft = fast_stft(audio, n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.win_length)
-        filter_bank = filter_bank_with_audio(audio, sr)
-        filter_bank = torch.tensor(filter_bank.transpose((1, 0)), dtype=torch.float32)
-        filter_bank = filter_bank.unsqueeze(0)
+        # filter_bank = filter_bank_with_audio(audio, sr)
+        # filter_bank = torch.tensor(filter_bank.transpose((1, 0)), dtype=torch.float32)
+        # filter_bank = filter_bank.unsqueeze(0)
+        mfcc_input = mfcc_transform(audio, sr=sr)
+        mfcc_input = torch.tensor(mfcc_input, dtype=torch.float32)
+        mfcc_input = mfcc_input.unsqueeze(0)
 
-        return filter_bank
+        return mfcc_input
 
     def __get_output(self, label_string, audio_length=None):
         raw_label = json.loads(label_string)
@@ -147,9 +150,9 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
 def test():
     print('In test')
     data_csv_path='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
-    data_csv_path='/home3/huydd/cut_by_mean/EOU_data/EOU_csv/data_de_train/infore.csv'
+    data_csv_path='/Users/huydd/Hedspi/Hedspi-05/code/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val.csv'
     # dataloader = get_dataloader(PHASE_TRAINING, batch_size=1, num_workers=20, dataset_json=data_json_path)
-    dataloader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=1, num_workers=1,csv_file=data_csv_path, hop_length=80)
+    dataloader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=1, num_workers=0,csv_file=data_csv_path, hop_length=80)
     # dataloader = get_dataloader(PHASE_PREDICTION, batch_size=8, num_workers=0)
     for i, data in enumerate(dataloader):
         print('================================================================')
