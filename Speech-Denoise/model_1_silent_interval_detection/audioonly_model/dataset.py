@@ -124,7 +124,7 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
             # Append silence at the end
             else:
                 for i in range(len(label)- audio_length):
-                    raw_label.pop()
+                    label.pop()
         # Khong dung thi xoa doan ben tren di
         label = torch.tensor(label, dtype=torch.float32)
         return label

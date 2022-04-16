@@ -96,7 +96,7 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
         # logfbank_signal = logfbank(snd, nfft=512, nfilt=60)
         # logfbank_signal = torch.tensor(logfbank_signal.transpose( (1, 0)), dtype=torch.float32)
         # logfbank_signal = logfbank_signal.unsqueeze(0)
-        filter_bank = filter_bank_with_audio(snd, sr)
+        filter_bank = filter_bank_with_audio(snd)
         filter_bank = torch.tensor(filter_bank.transpose((1, 0)), dtype=torch.float32)
         filter_bank = filter_bank.unsqueeze(0)
         return filter_bank
@@ -105,23 +105,23 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
         raw_label = json.loads(label_string)
         raw_label = [0 if x==2 else x for x in raw_label]
     
-        # else: 
-        # binary classification
-        # label = json.loads(f['label'])
-        # if audio_length is not None:
-        #     for i in range(audio_length - len(raw_label)):
-        #         raw_label.append(0)
-        #         # Append silence at the end
+        # Xu ly audio cho 8khz -> gop 2 index thanh 1 -> chia doi de lay gia tri
+        label = []
+        for i in range(len(raw_label)):
+            if (i%2 == 1):
+                # label.append((raw_label[i] + raw_label[i-1])/2)
+                label.append(raw_label[i])
+
         if audio_length is not None:
-            if audio_length > len(raw_label):
-                for i in range(audio_length - len(raw_label)):
-                    raw_label.append(0)
+            if audio_length > len(label):
+                for i in range(audio_length - len(label)):
+                    label.append(0)
             # Append silence at the end
             else:
-                for i in range(len(raw_label)- audio_length):
-                    raw_label.pop()
-
-        label = torch.tensor(raw_label, dtype=torch.float32)
+                for i in range(len(label)- audio_length):
+                    label.pop()
+        # Khong dung thi xoa doan ben tren di
+        label = torch.tensor(label, dtype=torch.float32)
         return label
 
 
@@ -148,7 +148,7 @@ def test():
     data_csv_path='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/data/train_youtube_huy_gan.csv'
     data_csv_path='/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val_first_data.csv'
     # dataloader = get_dataloader(PHASE_TRAINING, batch_size=1, num_workers=20, dataset_json=data_json_path)
-    dataloader = get_dataloader(PHASE_TESTING, sample_rate=16000, batch_size=1,csv_file=data_csv_path, hop_length=80)
+    dataloader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=1,csv_file=data_csv_path, hop_length=80)
     # dataloader = get_dataloader(PHASE_PREDICTION, batch_size=8, num_workers=0)
     for i, data in enumerate(dataloader):
         print('================================================================')

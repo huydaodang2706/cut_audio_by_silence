@@ -84,14 +84,14 @@ class BaseAgent(object):
         else:
             self.net
 
-    def load_ckpt(self, name=None):
+    def load_ckpt(self, load_path, name=None):
         """load checkpoint from saved checkpoint"""
-        if name != 'best_acc':
-            name = name if name == 'latest' else "ckpt_epoch{}".format(name)
+        # if name != 'best_acc':
+        #     name = name if name == 'latest' else "ckpt_epoch{}".format(name)
         
-        load_path = os.path.join(self.model_dir, "{}.pth".format(name))
-        if not os.path.exists(load_path):
-            raise ValueError("Checkpoint {} not exists.".format(load_path))
+        # load_path = os.path.join(self.model_dir, "{}.pth".format(name))
+        # if not os.path.exists(load_path):
+        #     raise ValueError("Checkpoint {} not exists.".format(load_path))
 
         checkpoint = torch.load(load_path)
         print("Checkpoint loaded from {}".format(load_path))

@@ -167,14 +167,16 @@ class AudioVisualNet(nn.Module):
 
 
 def test():
-    net = AudioVisualNet(freq_bins=128).to(torch.device('cpu'))
+    net = AudioVisualNet(freq_bins=256).to(torch.device('cpu'))
     # print(net)
     # v = torch.randn((8, 3, 60, 224, 224))
-
+    pytorch_total_params = sum(p.numel() for p in net.parameters())    
+    print('Number of params: ', pytorch_total_params)
+    print(net)
     # input of this network is the ouput of Fourier Transform (178 is the time frames)
     # 2 is the channel of Fourier transform (1 is real part, 2 is virtual part)
     # 8 here is the number of audio spectrogram
-    s = torch.randn((1, 2, 128, 600))
+    s = torch.randn((1, 2, 256, 600))
     # print(s)
     # out = net(v, s)
     start = timeit.default_timer()

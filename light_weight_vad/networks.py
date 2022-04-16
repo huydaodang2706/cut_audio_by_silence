@@ -51,7 +51,7 @@ class Conv2dBlock(nn.Module):
     def forward(self, x):
         return self.block(x)
 
-
+# Vad 2021 version 2 (light weight vad)
 class Vad_2021(nn.Module):
     def __init__(self):
         super(Vad_2021, self).__init__()
@@ -69,41 +69,29 @@ class Vad_2021(nn.Module):
         
     def forward(self, s):
         f_s = s
-        # print("input.shape:",f_s.shape)
-        
+   
         f_s = F.pad(f_s, self.padding, 'constant', 0)
-        # print("f_s.shape:",f_s.shape)
         f_s = self.layer_1(f_s)
-        # print("f_s.shape:",f_s.shape)
-        # print('--------')
-
+   
         f_s = F.pad(f_s, self.padding, 'constant', 0)
-        # print("f_s.shape:",f_s.shape)
         f_s = self.layer_2(f_s)
-        # print("f_s.shape:",f_s.shape)
-        # print('--------')
-
+   
         f_s = F.pad(f_s, self.padding, 'constant', 0)
-        # print("f_s.shape:",f_s.shape)
         f_s = self.layer_3(f_s)
-        # print("f_s.shape:",f_s.shape)
-        # print('--------')
       
         # Reshape tensor
         f_s = f_s.view(f_s.size(0), -1, f_s.size(3)) # (B, C1, T1)
-        # print("f_s.shape:",f_s.shape)
         
         merge = f_s.permute(2, 0, 1)  # (T1, B, C1+C2)
         merge, _ = self.lstm(merge)
-        # print("lstm.shape:",merge.shape)
-
+   
         merge = merge.permute(1, 0, 2)# (B, T1, C1+C2)
         merge = self.fc1(merge)
-        # print("merge-shape: ", merge.shape )
         out = merge.squeeze(2)
         
         return out
 
+# Test failed light vad 
 class Light_Vad(nn.Module):
     def __init__(self):
         super(Light_Vad, self).__init__()

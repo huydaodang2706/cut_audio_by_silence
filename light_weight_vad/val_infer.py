@@ -88,10 +88,10 @@ def main():
         # scheduler.load_state_dict(check_point['scheduler_state_dict'])
    
 
-    val_data_csv='/home3/huydd/data_silence_youtube/val_youtube_huy_gan.csv'
+    val_data_csv='/home3/huydd/vad_dataset/vad_data_team_data_gan_17_2_2022/vad_data.csv'
     # val_data_csv = '/Users/huydd/Hedspi/Hedspi-05/code/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val.csv'
     PHASE_TESTING = 'testing'
-    val_loader = get_dataloader(PHASE_TESTING, batch_size=batch_size, num_workers=num_workers, csv_file=val_data_csv)
+    val_loader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=batch_size, num_workers=num_workers, csv_file=val_data_csv)
     
     # net = GLDNN().cuda()
     
@@ -117,7 +117,8 @@ def main():
             else:
                 inputs = data['audio'].float()
                 label = data['label'].float()
-
+            # print("inputs shape: {}".format(inputs.shape))
+            # print("label shape {}".format(label.shape))
             # pbar.set_description("EVALUATION")
             outputs = net(inputs)
 

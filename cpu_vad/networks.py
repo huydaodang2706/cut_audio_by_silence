@@ -123,7 +123,7 @@ def test():
     else:
         net = net
         print('Don\'t have gpu')
-    s = torch.randn((1, 2, 60, 600))
+    s = torch.randn((1, 1, 60, 600))
     start = timeit.default_timer()
     out = net(s)
     stop = timeit.default_timer()
