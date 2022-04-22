@@ -14,5 +14,5 @@ Speech-Denoise/model_1_silent_interval_detection/audioonly_model/val_infer.py
 Speech-Denoise/model_1_silent_interval_detection/audioonly_model/model_ckpt
 Speech-Denoise/model_1_silent_interval_detection/vad_aicc
 cpu_vad/best_acc.pth
-light_weight_vad/__pycache__/
-light_weight_vad/model_ckpt/
+light_weight_vad_*/__pycache__/
+light_weight_vad_*/model_ckpt/
