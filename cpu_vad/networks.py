@@ -63,7 +63,7 @@ class Vad_2021(nn.Module):
         self.layer_4 = Conv2dBlock(64, 128, (3,2))
         self.padding = (1,0,1,1)
  
-        self.gru = nn.GRU(input_size=512, hidden_size=256, bidirectional=True)
+        self.gru = nn.GRU(input_size=512, hidden_size=512)
         self.fc1 = nn.Sequential(nn.Linear(512, 256),
                                 nn.ReLU(True),
                                 nn.Linear(256, 1))

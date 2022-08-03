@@ -106,12 +106,16 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
         raw_label = [0 if x==2 else x for x in raw_label]
     
         # Xu ly audio cho 8khz -> gop 2 index thanh 1 -> chia doi de lay gia tri
+        
         label = []
-        for i in range(len(raw_label)):
-            if (i%2 == 1):
-                # label.append((raw_label[i] + raw_label[i-1])/2)
-                label.append(raw_label[i])
-
+        if self.sample_rate == 8000:
+            for i in range(len(raw_label)):
+                if (i%2 == 1):
+                    # label.append((raw_label[i] + raw_label[i-1])/2)
+                    label.append(raw_label[i])
+        else: 
+            label = raw_label
+        
         if audio_length is not None:
             if audio_length > len(label):
                 for i in range(audio_length - len(label)):

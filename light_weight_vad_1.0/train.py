@@ -49,14 +49,14 @@ def main():
 
     writer = SummaryWriter()
     # create dataloader
-    train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/label_full_cuong.csv'
-    val_data = '/home3/huydd/vad_dataset/vad_data_team_data_gan_17_2_2022/vad_data.csv'
-    # train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/train.csv'
-    # val_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/val.csv'
+    # train_data = '/home3/huydd/cut_audio_by_silence/Speech-Denoise/model_1_silent_interval_detection/label_full_cuong.csv'
+    # val_data = '/home3/huydd/vad_dataset/vad_data_team_data_gan_17_2_2022/vad_data.csv'
+    train_data = '/home3/huydd/cut_by_mean/EOU_data/thesis_data_process/train.csv'
+    val_data = '/home3/huydd/cut_by_mean/EOU_data/thesis_data_process/val.csv'
     
-    train_loader = get_dataloader(PHASE_TRAINING, sample_rate=8000, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=train_data)
-    val_loader = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
-    val_loader_step = get_dataloader(PHASE_TESTING, sample_rate=8000, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
+    train_loader = get_dataloader(PHASE_TRAINING, sample_rate=16000, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=train_data)
+    val_loader = get_dataloader(PHASE_TESTING, sample_rate=16000, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
+    val_loader_step = get_dataloader(PHASE_TESTING, sample_rate=16000, batch_size=config.batch_size, num_workers=config.num_workers, csv_file=val_data)
     val_loader_step = cycle(val_loader_step)
     # val_loader = cycle(val_loader)
     # val_loader = get_dataloader(PHASE_TESTING, batch_size=config.batch_size, num_workers=config.num_workers, csv_file='/home3/huydd/cut_by_mean/GLDNN_EOU_detection/val_silence_6.csv')

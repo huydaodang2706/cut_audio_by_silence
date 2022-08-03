@@ -16,3 +16,11 @@ Speech-Denoise/model_1_silent_interval_detection/vad_aicc
 cpu_vad/best_acc.pth
 light_weight_vad_*/__pycache__/
 light_weight_vad_*/model_ckpt/
+light_weight_vad_*/model_output_cpu_vad/
+cpu_vad/train_log/
+light_weight_vad_*/train_log/
+light_weight_vad_2.0_*/
+
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/config_file_thanhpv.py
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/cut_audio_thanhpv.py
+Speech-Denoise/model_1_silent_interval_detection/audioonly_model/post_process_thanhpv.py

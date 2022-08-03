@@ -94,16 +94,16 @@ class AudioVisualAVSpeechMultipleVideoDataset(Dataset):
             snd = librosa.util.fix_length(snd, max_audio_length*sr)
         snd = audio_normalize(snd)
 
-        audio = snd
+        # audio = snd
         # mixed_sig_stft = fast_stft(audio, n_fft=self.n_fft, hop_length=self.hop_length, win_length=self.win_length)
-        # filter_bank = filter_bank_with_audio(audio, sr)
-        # filter_bank = torch.tensor(filter_bank.transpose((1, 0)), dtype=torch.float32)
-        # filter_bank = filter_bank.unsqueeze(0)
-        mfcc_input = mfcc_transform(audio, sr=sr)
-        mfcc_input = torch.tensor(mfcc_input, dtype=torch.float32)
-        mfcc_input = mfcc_input.unsqueeze(0)
+        filter_bank = filter_bank_with_audio(snd)
+        filter_bank = torch.tensor(filter_bank.transpose((1, 0)), dtype=torch.float32)
+        filter_bank = filter_bank.unsqueeze(0)
+        # mfcc_input = mfcc_transform(audio, sr=sr)
+        # mfcc_input = torch.tensor(mfcc_input, dtype=torch.float32)
+        # mfcc_input = mfcc_input.unsqueeze(0)
 
-        return mfcc_input
+        return filter_bank
 
     def __get_output(self, label_string, audio_length=None):
         raw_label = json.loads(label_string)

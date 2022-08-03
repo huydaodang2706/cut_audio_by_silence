@@ -57,7 +57,7 @@ class Config(object):
 
         # training configuration
         self.nr_epochs = 60
-        self.batch_size = 1    # GPU memory usage
+        self.batch_size = 6    # GPU memory usage
         self.num_workers = 1 #32 #multiprocessing.cpu_count()    # RAM usage
         self.lr = 1e-3 #1e-4
         self.lr_step_size = 15

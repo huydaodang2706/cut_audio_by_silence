@@ -62,7 +62,7 @@ def audio_normalize(snd):
 def mfcc_transform(audio, sr=16000, n_mfcc=60, n_fft=510, hop_length=160, win_length=400):
     return librosa.feature.mfcc(audio, sr=sr, n_mfcc=n_mfcc, n_fft=n_fft, hop_length=hop_length, win_length=win_length)
 
-def filter_bank_with_audio(signal, sample_rate, nfilt=60):
+def filter_bank_with_audio(signal, sample_rate=16000, nfilt=60):
     # Calculate log mel filterbank
     # sample_rate, signal = scipy.io.wavfile.read(path)  # File assumed to be in the same directory
     # print(signal.shape[0])

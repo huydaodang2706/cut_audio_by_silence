@@ -60,6 +60,8 @@ class Vad_2021(nn.Module):
         self.layer_1 = Conv2dBlock(1, 16, (3,2))
         self.layer_2 = Conv2dBlock(16, 32, (3,2))
         self.layer_3 = Conv2dBlock(32, 32, (3,2))
+        self.layer_4 = Conv2dBlock(32, 64, (3,2))
+
         self.padding = (1,0,1,1)
  
         self.lstm = nn.LSTM(input_size=256, hidden_size=128, bidirectional=True)
@@ -78,7 +80,10 @@ class Vad_2021(nn.Module):
    
         f_s = F.pad(f_s, self.padding, 'constant', 0)
         f_s = self.layer_3(f_s)
-      
+        # print(f_s.shape)
+        f_s = F.pad(f_s, self.padding, 'constant', 0)
+        f_s = self.layer_4(f_s)
+        # print(f_s.shape)
         # Reshape tensor
         f_s = f_s.view(f_s.size(0), -1, f_s.size(3)) # (B, C1, T1)
         
